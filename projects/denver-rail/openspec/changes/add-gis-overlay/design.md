@@ -144,6 +144,10 @@ The 3 km floor keeps short local hops from drowning out the longer trips that ra
 
 - **Library:** Leaflet 1.9.4 from cdnjs.
 - **Basemap:** a light, low-contrast raster (CARTO Positron, no labels), with a labels-only overlay above the data layers.
+  - CARTO's basemap terms (dated 2026-09-29) need an API key for free non-commercial use, and tiles requested without a key may be watermarked.
+  - The template builds the tile URLs with the literal token `__CARTO_API_KEY__`, and `build_map` always writes that token, never a real key. The key stays out of the committed `out/map.html`.
+  - The token is replaced with a real key only when the map is published (see the publish-overlay-map change, design decision 4).
+  - When the map is opened from disk, tile requests may be refused or watermarked. The data layers still render over the plain background required by the "Basemap unavailable" scenario.
 - **Data:** `build_map` reads a hand-written `scripts/map_template.html` and inserts the clean layers as `const` GeoJSON objects. The output is one file that only needs the network for tiles.
 - **Layer toggles:** one per layer group, from a custom legend panel rather than Leaflet's default control, so the legend can double as the color key.
 - **Popups:**

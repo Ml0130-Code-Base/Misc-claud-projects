@@ -67,7 +67,7 @@ Paths are relative to `projects/denver-rail/`. Tests use the standard-library `u
 
 ## 8. Overlay map
 
-- [ ] 8.1 Write `scripts/map_template.html` (Leaflet 1.9.4 from cdnjs, CARTO Positron no-labels base, labels overlay, plain background fallback) and `scripts/build_map.py` to embed the clean layers as `const` GeoJSON in `out/map.html`; verify by opening the file through `file://` with tiles blocked and confirming every layer renders
+- [ ] 8.1 Write `scripts/map_template.html` (Leaflet 1.9.4 from cdnjs, CARTO Positron no-labels base, labels overlay, plain background fallback) and `scripts/build_map.py` to embed the clean layers as `const` GeoJSON in `out/map.html`. Build the CARTO tile URLs with the literal key token `__CARTO_API_KEY__` and never write a real key (design decision 7). Verify by opening the file through `file://` with tiles blocked and confirming every layer renders, and with a unit test that the built page contains the token and no key value
 - [ ] 8.2 Build a combined legend and toggle panel for Historic lines, Today's bus, Rail+BRT and Commute flows; verify in the browser that each toggle hides only its own group
 - [ ] 8.3 Style historic lines by the five verdict classes plus an "unmatched" style, draw planned features dashed, and use muted modern layers with RTD route colors for rail; verify that the legend shows all six historic styles and that the colors match `corridors.csv` for three sample lines
 - [ ] 8.4 Add popups for historic lines, bus routes, planned features and commute features with the attributes from the overlay-map spec; verify by clicking one of each in the browser
