@@ -1,0 +1,66 @@
+schema: spec-driven
+
+context: |
+  Cherry Air (CHY) is a VATSIM virtual airline. This project moves its route and
+  flight-number master out of a spreadsheet into a self-hosted app. CLAUDE.md in
+  this folder is the authoritative handoff; read it before writing any artifact.
+
+  Non-negotiable constraints:
+  - Route authority: no route is added, retired, re-tagged or moved without the
+    owner's explicit approval. Code may propose route changes (a reviewable
+    proposal or diff); it never applies them unprompted. A change that alters the
+    network must say so and stays a proposal until approved.
+  - Flight numbers are permanent: no change may alter an existing route's
+    outbound/return number. Numbers come from the allocator (lowest free even pair
+    in the origin hub's block, never in the ledger), never from users, sort order
+    or randomness. Retiring a route is a status change; its numbers are never
+    reissued.
+  - Seed data in data/source/ (v6 workbook, routes_v6.csv, ledger_v6.json) is
+    read-only input and must import without renumbering anything. The spreadsheet
+    stays the source of truth until the golden tests in CLAUDE.md section 11 pass.
+    Pre-v6 numbers ("was X/Y" notes, Change Log) are historical text only.
+  - Every emitted callsign is VATSIM-legal: CHY + at most 4 chars, digits first,
+    at most one letter and only at the end. Hub letters are reserved for backups.
+  - ATC is weather: never design anything around VATSIM controller staffing
+    (no "flyable now", ARTCC-online filters, or event-driven routing).
+  - No financial or regulatory simulation; SERVICE_TYPE describes the kind of city
+    served. The lookup input for ANY/NORMAL/HUB/THRU is named ROUTING TYPE.
+
+  Stack and environment:
+  - FastAPI + SQLite, vanilla JS + Tailwind, mobile-friendly, few dependencies.
+    Docker Compose + Caddy on the self-hosted server.
+  - Desktop is Windows; give commands in PowerShell and state explicitly what
+    runs on the desktop vs the server.
+  - Everything stays inside projects/cherry-air/ (its own deps, config, README);
+    nothing is added at the repo root.
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+# Example:
+#   context: |
+#     Designs and tasks must cover Windows, macOS, and Linux
+#     Write all artifacts in Spanish
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

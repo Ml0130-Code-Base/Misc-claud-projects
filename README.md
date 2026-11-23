@@ -28,4 +28,6 @@ Then fill in `projects/my-new-project/README.md`.
 
 | Project | Description | Status |
 |---------|-------------|--------|
-| _(none yet)_ | | |
+| [denver-rail](projects/denver-rail/) | GIS overlay of historic Denver Tramway lines vs today's RTD service and commute flows | Planning |
+| [metro-maps](projects/metro-maps/) | Snapshot and analyze MetroDreamin fantasy transit maps (Denver, San Diego) into exact edit punch lists | Planning |
+| [cherry-air](projects/cherry-air/) | Cherry Air (CHY) VATSIM schedule & dispatch: v6 sheet to SQLite/FastAPI app with permanent flight numbers | Planning (OpenSpec) |
