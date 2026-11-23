@@ -1,0 +1,4 @@
+# Local map data: map #14 is private on MetroDreamin, keep snapshots off git.
+snapshots/
+reports/
+__pycache__/

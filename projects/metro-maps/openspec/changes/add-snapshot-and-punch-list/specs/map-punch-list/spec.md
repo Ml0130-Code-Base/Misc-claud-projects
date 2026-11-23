@@ -36,15 +36,27 @@ The system SHALL list every station that appears on no line under DELETE, with t
 - **THEN** it is listed under DELETE with its exact name, the nearest line's name and the distance
 
 ### Requirement: Report near-duplicate stations
-The system SHALL list under MERGE each pair of distinct station objects within 150 m of each other or with identical names, with the distance and the lines each serves.
+The system SHALL list under MERGE each pair of distinct station objects that share no line and are within 150 m of each other or have identical names, with the distance and the lines each serves. Placeholder station names SHALL NOT count as identical names.
 
 #### Scenario: Two objects at one location
-- **WHEN** two station objects are 40 m apart
+- **WHEN** two station objects on different lines are 40 m apart
 - **THEN** the pair is listed once under MERGE with both exact names, the distance and each station's lines
 
 #### Scenario: Same name far apart
-- **WHEN** two station objects share the name `County Admin. Ctr.` and are 2 km apart
+- **WHEN** two station objects on different lines share the name `Belleview` and are 9 km apart
 - **THEN** the pair is listed under MERGE with the distance so the author can rename or merge
+
+#### Scenario: Stops on the same line
+- **WHEN** two stations both served by `16th Street Tram` are 104 m apart, or share a name
+- **THEN** the pair is not listed as a near-duplicate (adjacent stops are covered by the spacing check)
+
+#### Scenario: Placeholder names
+- **WHEN** two stations on different lines are both named `Station Name` and are 7 km apart
+- **THEN** the pair is not listed as a near-duplicate, and each station is still listed under HOUSEKEEPING as a placeholder
+
+#### Scenario: Placeholder close to another station
+- **WHEN** a station named `Station Name` is 71 m from a station on a different line
+- **THEN** the pair is listed as a near-duplicate
 
 ### Requirement: Treat placeholder-named lines as drafts
 The system SHALL treat a line whose name matches a placeholder pattern (such as `Concept 3`, `Line 4`, `Untitled`, or blank) as a draft, list it once under HOUSEKEEPING with its station count, and exclude it from spacing and duplicate checks while still counting its stations as on a line.

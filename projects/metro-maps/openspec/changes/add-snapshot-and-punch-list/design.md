@@ -53,7 +53,7 @@ Stored as a table in `analyze.py` so they are easy to adjust. Lines with an empt
 
 **Category mapping.**
 - DELETE: orphan stations (on no line), with the nearest line and distance as context in case "assign" is the better fix.
-- MERGE: pairs of distinct station objects within 150 m of each other, or sharing an identical name, with the distance and the lines each serves. Also "too close" spacing pairs.
+- MERGE: pairs of distinct station objects that share no (non-draft) line and are within 150 m of each other or share an identical non-placeholder name, with the distance and the lines each serves. Also "too close" spacing pairs. Pairs on a shared line are left to the spacing check: the first live run flagged 53 Denver pairs that were consecutive 16th Street Tram stops or the same stop drawn out-and-back, and 49 more that matched only because both were named `Station Name`.
 - CREATE: "too far" spacing gaps, written as "infill between A and B on <line>, gap X km".
 - HOUSEKEEPING: placeholder station names, draft lines, lines with no or unknown mode, line names or line-group labels with leading, trailing or doubled spaces, lines with fewer than 2 stations, and stations repeated in a line's sequence other than a loop closing on its start.
 
