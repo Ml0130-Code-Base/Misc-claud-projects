@@ -4,7 +4,7 @@ Paths are relative to `projects/denver-rail/`. Tests use the standard-library `u
 
 ## 1. Environment and scaffolding
 
-- [ ] 1.1 Install Python 3.12+ for Windows (python.org installer or `winget install Python.Python.3.12`), and use the `py` launcher so the Microsoft Store `python` alias doesn't get in the way; verify that `py -3.12 --version` prints 3.12 or newer in PowerShell
+- [ ] 1.1 Confirm Python 3.12+ is available through the `py` launcher (3.12.10 was installed as of 2026-11-23; the bare `python` command is still the Microsoft Store alias, so never use it). If it is missing, install it with `winget install Python.Python.3.12`; verify that `py -3.12 --version` prints 3.12 or newer in PowerShell
 - [ ] 1.2 Create `.venv` with `py -3.12 -m venv .venv`; verify that `.\.venv\Scripts\python.exe --version` runs
 - [ ] 1.3 Create the folders `data/raw/`, `data/reference/`, `data/clean/`, `scripts/`, `tests/fixtures/`, `out/` and `docs/`, plus a project `.gitignore` that ignores `data/raw/`, `data/clean/` and `.venv/`; verify that `git status` shows no files under ignored paths after a dummy file is placed in each
 - [ ] 1.4 Add `requirements.txt` (empty apart from a comment saying stdlib only, with `shapely` only if design decision 2 is revisited); verify that `.\.venv\Scripts\pip install -r requirements.txt` succeeds
@@ -17,26 +17,27 @@ Paths are relative to `projects/denver-rail/`. Tests use the standard-library `u
 - [ ] 2.2 Create `data/reference/corridors.csv`, with every corridor from handover section 6 (13 table rows; "17th Ave / 6th Ave" and "Cherokee / Leyden-Arvada" are split, giving 15 corridors), their 1946 route numbers, modern routes, rail/BRT status, verdict text and verdict class as assigned in design decision 4; verify with the validator from 2.6
 - [ ] 2.3 Create `data/reference/through_pairs_1946.csv` with the three pairs (Berkeley to S Gaylord, W 44th to E 28th, Sheridan to E 40th), each mapped to the corridor ids on both ends; verify with the validator from 2.6
 - [ ] 2.4 Create `data/reference/planned.csv` for East Colfax BRT, Federal BRT, Colorado Blvd BRT, the L Line extension and the Colorado Connector, each with `source_route`, end stops, target year and `as_of` 2026-09; verify with the validator from 2.6 (stop ids are filled in during task 5.6, once GTFS is available)
-- [ ] 2.5 Create `data/reference/ridership.csv` from the scorecard export (header only until 2.1 is done) and an empty `data/reference/cdot_to_1946.csv` with headers; verify with the validator from 2.6
+- [ ] 2.5 Create `data/reference/ridership.csv` from the scorecard export (header only until 2.1 is done) and an empty `data/reference/cdot_to_1946.csv` with the headers `SEG_ID`, `routes_1946` and `note`; verify with the validator from 2.6
 - [ ] 2.6 Write `scripts/check_reference.py`, which checks required columns, that `verdict_class` is one of the five allowed values, unique corridor ids, and that through-pair corridor ids exist in `corridors.csv`; verify with unit tests covering one good fixture and one fixture for each error type, and that it passes on the real reference files
 - [ ] 2.7 Document the reference files (what each holds, who edits it, where its values come from) in the README; verify that every file in `data/reference/` is described
 
 ## 3. Fetch and provenance
 
-- [ ] 3.1 Verify the current download URLs for the CDOT historic streetcar layer (GeoJSON export preferred), the RTD GTFS feed, LODES8 CO `od_main_JT00`, `od_aux_JT00` and `xwalk` (latest year), and the tundria 1946 route page; record them with the check date in `NOTES.md`
-- [ ] 3.2 Write `scripts/fetch.py`, which downloads each source into `data/raw/<source>/` and writes `data/raw/manifest.json` entries (URL, timestamp, size, SHA-256); verify with a unit test that fetches a `file://` fixture URL and checks the manifest entry
+- [ ] 3.1 Re-check the source URLs recorded under "Verified sources" in design.md (CDOT layer-3 GeoJSON query, RTD GTFS zip, LODES8 CO `od` directory) and verify the tundria 1946 route page for the first time; record each URL with the check date in `NOTES.md`, and update design.md if any has moved
+- [ ] 3.2 Write `scripts/fetch.py`, which downloads each source into `data/raw/<source>/` and writes `data/raw/manifest.json` entries (URL, timestamp, size, SHA-256). For CDOT, request layer 3 only (`outSR=4326&f=geojson`). For LODES, pick the newest year listed in the CO `od` directory for `od_main_JT00`, `od_aux_JT00` and `xwalk`, and record that year. Verify with unit tests that fetch a `file://` fixture URL and check the manifest entry, and that pick the newest year from a fixture directory listing
 - [ ] 3.3 Make `fetch.py` exit non-zero when a download fails, printing the URL and the expected manual-download path; verify with a unit test that uses an unreachable URL
 - [ ] 3.4 Add a `--register-manual` mode that records hand-placed files as source "manual" with size and SHA-256; verify with a unit test
 - [ ] 3.5 Write `scripts/verify_raw.py`, which checks every raw file's SHA-256 against the manifest and exits non-zero on any mismatch; verify with a unit test that alters a fixture file after registering it
-- [ ] 3.6 Run the fetch for real, placing any blocked source by hand and registering it; verify that the manifest lists every source, then append a dated `NOTES.md` entry with GTFS `feed_info` dates and the LODES year
+- [ ] 3.6 Run the fetch for real, placing any blocked source by hand and registering it. Expect the RTD GTFS zip to need this: the owner accepts RTD's licence in a browser and saves the zip to the printed path; verify that the manifest lists every source, then append a dated `NOTES.md` entry with GTFS `feed_info` dates and the LODES year
 
 ## 4. Historic corridors
 
-- [ ] 4.1 Inspect the CDOT download's schema, CRS and feature count; record the field list, CRS and count in `NOTES.md`, and note whether any field carries route names or numbers
-- [ ] 4.2 Write `scripts/historic.py` to load the CDOT layer and write `data/clean/historic.geojson` in EPSG:4326 with every source attribute unchanged; verify with a unit test that compares fixture attributes and checks coordinates fall inside the Denver metro box. If the source is only available in a projected CRS, add `pyproj` to `requirements.txt` and record why in `NOTES.md`
-- [ ] 4.3 Add `route_1946` matching (source attribute first, `cdot_to_1946.csv` override wins, otherwise empty and listed as unmatched); verify with unit tests for each of the three paths
-- [ ] 4.4 Attach `corridor_id`, `verdict_text` and `verdict_class` from `corridors.csv`, and list corridors with no feature as unrepresented; verify with unit tests
-- [ ] 4.5 Fill in `cdot_to_1946.csv` for features that could not be matched automatically, using the tundria 1946 list; verify by rerunning `historic.py` and confirming that every remaining unmatched feature is explained in `NOTES.md`
+- [ ] 4.1 Check the real CDOT download against the schema in design.md "Verified sources" (layer 3, fields including `SEG_ID`, `LINE_NM`, `COUNTY`, `OPS_START`, `OPS_END`, 481 features statewide, EPSG:4326 coordinates); record the field list, feature count and any differences in `NOTES.md`, and stop to update the design if the schema has changed
+- [ ] 4.2 Write `scripts/historic.py` to load the layer-3 GeoJSON and write `data/clean/historic.geojson` in EPSG:4326 with every source attribute unchanged; verify with a unit test that compares fixture attributes and checks coordinates fall inside the Denver metro box (no `pyproj`: the server already returns EPSG:4326)
+- [ ] 4.3 Add the design decision 10 filters: keep features whose comma-split, trimmed `COUNTY` includes an RTD county and whose `OPS_START` year ≤ 1946 ≤ `OPS_END` year (a missing start counts as before 1946 and is reported), and count dropped features by reason; verify with unit tests for a multi-county value with trailing spaces, a 1941 closure, a 1951 closure, a missing start date and an out-of-area county. On the real data, expect about 85 kept features
+- [ ] 4.4 Add `route_1946` matching: a `cdot_to_1946.csv` override keyed by `SEG_ID` wins; otherwise parse the trailing comma-separated integers from `LINE_NM` and keep them only if every number is a known route; otherwise leave it empty and list it as unmatched with its raw `LINE_NM`. Verify with unit tests for the override, a multi-route parse (`…, 27, 47`), a name with no number, and an unknown number (`…, 167`)
+- [ ] 4.5 Attach `corridor_id`, `verdict_text` and `verdict_class` from `corridors.csv`, and list corridors with no feature as unrepresented; verify with unit tests
+- [ ] 4.6 Fill in `cdot_to_1946.csv` for the features that could not be matched automatically (about 34 on the 2026-11-23 data, mostly D&NW and DL&G interurbans, plus the `167` segment), using the tundria 1946 list; verify by rerunning `historic.py` and confirming that every remaining unmatched feature is explained in `NOTES.md`
 
 ## 5. Transit network
 
@@ -75,7 +76,7 @@ Paths are relative to `projects/denver-rail/`. Tests use the standard-library `u
 
 ## 9. Reports
 
-- [ ] 9.1 Write `scripts/report.py` to produce `out/layer_stats.json` (count per clean layer, unmatched features, unrepresented corridors, disagreements, thresholds used); verify with a unit test on fixture clean layers
+- [ ] 9.1 Write `scripts/report.py` to produce `out/layer_stats.json` (count per clean layer, historic features dropped by filter reason, unmatched features, unrepresented corridors, disagreements, thresholds used); verify with a unit test on fixture clean layers
 - [ ] 9.2 Generate `summary.md` sections between marker comments (source versions, layer counts, join results, disagreements, a "re-check before publishing" list of planned-project dates), keeping text outside the markers; verify with a unit test that regenerates the file twice and checks hand-written text survives
 - [ ] 9.3 Add `run_all.ps1` to run `check_reference`, `fetch` (skipping downloads already in the manifest), `verify_raw`, `historic`, `transit`, `flows`, `compare`, `build_map`, `report` and a final `verify_raw`, stopping at the first failure; verify that it exits non-zero when a reference file is broken on purpose
 
